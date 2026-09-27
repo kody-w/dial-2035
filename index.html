@@ -1,0 +1,1292 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="Dial from 2026 to 2035 and watch a coastal city adapt to climate pressure.">
+  <meta name="theme-color" content="#142328">
+  <meta name="build-marker" content="DIAL2035-LIVE">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='28' fill='%2317231f'/%3E%3Cpath d='M32 14v18l13 9' fill='none' stroke='%23ff684b' stroke-width='6' stroke-linecap='round'/%3E%3C/svg%3E">
+  <title>Dial 2035 | Watch a city adapt</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --ink: #17201d;
+      --muted: #50615b;
+      --surface: #edf2ea;
+      --surface-soft: rgba(237, 242, 234, 0.76);
+      --line: rgba(23, 32, 29, 0.18);
+      --scene-shadow: rgba(28, 48, 44, 0.16);
+      --accent: #ee5a3d;
+      --accent-deep: #b93823;
+      --sky-top: #c9dedd;
+      --sky-bottom: #edf2ea;
+      --water-top: #6e999c;
+      --water-bottom: #426e75;
+      --concrete: #77857f;
+      --concrete-dark: #4f615b;
+      --glass: #d4e3de;
+      --glass-dark: #77918c;
+      --ground: #52645c;
+      --road: #384640;
+      --canopy: #315f49;
+      --canopy-light: #6f9a72;
+      --sand: #a99b79;
+      --dial-size: clamp(132px, 14vw, 174px);
+      --safe-bottom: max(18px, env(safe-area-inset-bottom));
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --ink: #e8eee8;
+        --muted: #adbbb5;
+        --surface: #111918;
+        --surface-soft: rgba(17, 25, 24, 0.78);
+        --line: rgba(232, 238, 232, 0.2);
+        --scene-shadow: rgba(0, 0, 0, 0.28);
+        --accent: #ff684b;
+        --accent-deep: #ff8b72;
+        --sky-top: #142328;
+        --sky-bottom: #2a4245;
+        --water-top: #416e78;
+        --water-bottom: #183c47;
+        --concrete: #6c7c77;
+        --concrete-dark: #354741;
+        --glass: #829b97;
+        --glass-dark: #3f5f5c;
+        --ground: #35463f;
+        --road: #1e2a26;
+        --canopy: #4e8061;
+        --canopy-light: #8aaf7e;
+        --sand: #8f815f;
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      min-width: 320px;
+      min-height: 100%;
+      margin: 0;
+      overflow: hidden;
+      overscroll-behavior: none;
+    }
+
+    body {
+      background: var(--surface);
+      color: var(--ink);
+      font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      text-rendering: optimizeLegibility;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    .app {
+      position: relative;
+      isolation: isolate;
+      width: 100%;
+      min-height: 100dvh;
+      overflow: hidden;
+      background: var(--surface);
+    }
+
+    .masthead {
+      position: absolute;
+      z-index: 20;
+      top: 0;
+      left: 0;
+      width: 100%;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 24px;
+      padding: clamp(20px, 3vw, 42px) clamp(20px, 4vw, 64px) 0;
+      pointer-events: none;
+    }
+
+    .title-lockup {
+      max-width: 520px;
+    }
+
+    .title-lockup p {
+      margin: 0 0 7px;
+      font-size: clamp(10px, 0.72vw, 12px);
+      font-weight: 760;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    h1 {
+      max-width: 9ch;
+      margin: 0;
+      font-size: clamp(40px, 5.4vw, 78px);
+      font-weight: 820;
+      letter-spacing: -0.065em;
+      line-height: 0.88;
+    }
+
+    h1 span {
+      display: block;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 0.44em;
+      font-weight: 560;
+      letter-spacing: -0.045em;
+      line-height: 1;
+    }
+
+    .live-marker {
+      display: flex;
+      align-items: center;
+      min-height: 34px;
+      padding: 0 13px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--surface-soft);
+      color: var(--muted);
+      font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+      font-size: 10px;
+      font-weight: 720;
+      letter-spacing: 0.12em;
+      white-space: nowrap;
+      backdrop-filter: blur(16px) saturate(125%);
+      -webkit-backdrop-filter: blur(16px) saturate(125%);
+    }
+
+    .scene {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      background: var(--sky-top);
+      box-shadow: inset 0 -18vh 15vh var(--scene-shadow);
+    }
+
+    .city-svg {
+      --reflect: 0;
+      --shade: 0;
+      --street: 0;
+      --storm: 0;
+      --energy: 0;
+      --transit: 0;
+      --green: 0;
+      --wetland: 0;
+      --connect: 0;
+      --climate: 0;
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      filter: saturate(calc(0.94 + var(--green) * 0.09));
+    }
+
+    .city-svg :is(.transition-opacity, .transition-transform, .transition-fill, .transition-stroke) {
+      transition-duration: 720ms;
+      transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .transition-opacity {
+      transition-property: opacity;
+    }
+
+    .transition-transform {
+      transition-property: transform, opacity;
+      transform-box: fill-box;
+      transform-origin: center;
+    }
+
+    .transition-fill {
+      transition-property: fill, opacity;
+    }
+
+    .transition-stroke {
+      transition-property: stroke, opacity, stroke-dashoffset;
+    }
+
+    #waterLayer {
+      transform: translateY(calc(var(--climate) * -9px));
+      transform-box: fill-box;
+      transform-origin: center;
+      transition: transform 720ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .heat-line {
+      opacity: calc(0.1 + var(--climate) * 0.48 - var(--shade) * 0.18);
+      transform: translateY(calc(var(--climate) * -8px));
+    }
+
+    .hard-edge {
+      opacity: calc(1 - var(--wetland));
+      transform: translateY(calc(var(--wetland) * 18px));
+    }
+
+    .wetland {
+      opacity: var(--wetland);
+      transform: translateY(calc((1 - var(--wetland)) * 28px));
+    }
+
+    .roof-dark {
+      opacity: calc(1 - var(--reflect));
+    }
+
+    .roof-cool {
+      opacity: var(--reflect);
+    }
+
+    .shade-system {
+      opacity: var(--shade);
+      transform: translateY(calc((1 - var(--shade)) * 15px)) scaleY(calc(0.72 + var(--shade) * 0.28));
+    }
+
+    .shade-tree {
+      transform: scale(calc(0.72 + var(--shade) * 0.28));
+    }
+
+    .old-road {
+      opacity: calc(1 - var(--street) * 0.72);
+    }
+
+    .sponge-street {
+      opacity: var(--street);
+      transform: scaleX(calc(0.7 + var(--street) * 0.3));
+    }
+
+    .storm-system {
+      opacity: var(--storm);
+      transform: translateY(calc((1 - var(--storm)) * 20px));
+    }
+
+    .energy-system {
+      opacity: var(--energy);
+      transform: translateY(calc((1 - var(--energy)) * 12px));
+    }
+
+    .solar-panel {
+      opacity: var(--energy);
+      transform: perspective(160px) rotateX(calc((1 - var(--energy)) * 74deg));
+      transform-origin: bottom;
+    }
+
+    .transit-system {
+      opacity: var(--transit);
+      transform: translateX(calc((1 - var(--transit)) * -70px));
+    }
+
+    .green-system {
+      opacity: var(--green);
+      transform: translateY(calc((1 - var(--green)) * 20px));
+    }
+
+    .connection-system {
+      opacity: var(--connect);
+    }
+
+    .rain-streak {
+      opacity: 0;
+    }
+
+    .rain-run .rain-streak {
+      animation: rain-sweep 1100ms cubic-bezier(0.22, 1, 0.36, 1) both;
+      animation-delay: calc(var(--i) * 24ms);
+    }
+
+    .train-run #train {
+      animation: train-arrive 920ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    #finalSignal {
+      stroke-dasharray: 22 16;
+      stroke-dashoffset: 500;
+    }
+
+    .signal-run #finalSignal {
+      animation: signal-travel 1550ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    @keyframes rain-sweep {
+      0% { opacity: 0; transform: translate(-45px, -55px); }
+      20% { opacity: 0.72; }
+      75% { opacity: 0.56; }
+      100% { opacity: 0; transform: translate(35px, 95px); }
+    }
+
+    @keyframes train-arrive {
+      0% { transform: translateX(-260px); opacity: 0; }
+      25% { opacity: 1; }
+      100% { transform: translateX(0); opacity: 1; }
+    }
+
+    @keyframes signal-travel {
+      0% { stroke-dashoffset: 500; opacity: 0; }
+      18% { opacity: 1; }
+      72% { stroke-dashoffset: 0; opacity: 1; }
+      100% { stroke-dashoffset: -80; opacity: 0.38; }
+    }
+
+    .story {
+      position: absolute;
+      z-index: 16;
+      left: clamp(20px, 4vw, 64px);
+      bottom: clamp(32px, 5.6vh, 64px);
+      width: min(370px, calc(100vw - 40px));
+      padding: 18px 20px 19px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--surface-soft);
+      box-shadow: 0 18px 56px var(--scene-shadow);
+      backdrop-filter: blur(18px) saturate(125%);
+      -webkit-backdrop-filter: blur(18px) saturate(125%);
+    }
+
+    .story-head {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      align-items: baseline;
+      gap: 13px;
+    }
+
+    .story-year {
+      color: var(--accent-deep);
+      font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+      font-size: 12px;
+      font-weight: 760;
+      letter-spacing: 0.08em;
+    }
+
+    .story h2 {
+      margin: 0;
+      font-size: clamp(18px, 1.65vw, 25px);
+      font-weight: 760;
+      letter-spacing: -0.035em;
+      line-height: 1.05;
+    }
+
+    .story-copy {
+      min-height: 2.8em;
+      margin: 9px 0 0 42px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .systems {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin: 14px 0 0 42px;
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+    }
+
+    .system-label {
+      display: block;
+      margin-bottom: 3px;
+      color: var(--muted);
+      font-size: 9px;
+      font-weight: 760;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .system-value {
+      display: block;
+      overflow: hidden;
+      color: var(--ink);
+      font-size: 11px;
+      font-weight: 680;
+      line-height: 1.2;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .dial-console {
+      position: absolute;
+      z-index: 24;
+      right: clamp(22px, 5vw, 78px);
+      bottom: var(--safe-bottom);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: calc(var(--dial-size) + 34px);
+    }
+
+    .dial-label {
+      margin-bottom: 7px;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 760;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+    }
+
+    .dial-shell {
+      position: relative;
+      width: var(--dial-size);
+      height: var(--dial-size);
+      border-radius: 50%;
+      box-shadow: 0 24px 70px var(--scene-shadow);
+    }
+
+    .dial-input {
+      position: absolute;
+      z-index: 5;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      cursor: ew-resize;
+      opacity: 0;
+    }
+
+    .dial-face {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      border: 1px solid color-mix(in srgb, var(--ink) 32%, transparent);
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 40% 33%, color-mix(in srgb, var(--surface) 88%, white 12%) 0 7%, transparent 8%),
+        radial-gradient(circle at 50% 52%, color-mix(in srgb, var(--surface) 88%, var(--ink) 12%) 0 51%, transparent 52%),
+        repeating-conic-gradient(from 224deg, var(--ink) 0 1deg, transparent 1deg 9deg),
+        conic-gradient(from 224deg, var(--accent) 0deg calc(var(--dial-progress) * 264deg), color-mix(in srgb, var(--ink) 16%, transparent) 0 264deg, transparent 264deg 360deg);
+      box-shadow:
+        inset 0 1px 0 color-mix(in srgb, var(--surface) 75%, white 25%),
+        inset 0 -8px 20px color-mix(in srgb, var(--ink) 14%, transparent),
+        0 0 0 7px color-mix(in srgb, var(--surface) 78%, transparent);
+      transition: box-shadow 180ms ease, transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .dial-input:hover + .dial-face {
+      transform: translateY(-2px);
+    }
+
+    .dial-input:active + .dial-face {
+      transform: translateY(1px) scale(0.985);
+    }
+
+    .dial-input:focus-visible + .dial-face {
+      outline: 4px solid color-mix(in srgb, var(--accent) 82%, white 18%);
+      outline-offset: 5px;
+    }
+
+    .dial-pointer {
+      position: absolute;
+      inset: 12%;
+      transform: rotate(var(--dial-angle));
+      transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .dial-pointer::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 50%;
+      width: 5px;
+      height: 25%;
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow: 0 2px 5px color-mix(in srgb, var(--accent) 34%, transparent);
+      transform: translateX(-50%);
+    }
+
+    .dial-core {
+      position: relative;
+      display: grid;
+      place-items: center;
+      width: 58%;
+      aspect-ratio: 1;
+      border: 1px solid color-mix(in srgb, var(--ink) 20%, transparent);
+      border-radius: 50%;
+      background: color-mix(in srgb, var(--surface) 92%, var(--ink) 8%);
+      box-shadow:
+        inset 0 1px 1px color-mix(in srgb, var(--surface) 70%, white 30%),
+        0 8px 18px color-mix(in srgb, var(--ink) 16%, transparent);
+      text-align: center;
+    }
+
+    .dial-year {
+      margin-top: 11%;
+      font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+      font-size: clamp(20px, 2.4vw, 30px);
+      font-weight: 760;
+      letter-spacing: -0.05em;
+      line-height: 1;
+    }
+
+    .dial-subtitle {
+      margin-top: -17%;
+      color: var(--muted);
+      font-size: clamp(7px, 0.52vw, 9px);
+      font-weight: 780;
+      letter-spacing: 0.11em;
+      text-transform: uppercase;
+    }
+
+    .dial-guide {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      margin-top: 10px;
+      color: var(--muted);
+      font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+      font-size: 9px;
+      font-weight: 680;
+      letter-spacing: 0.07em;
+    }
+
+    .dial-guide span:nth-child(2) {
+      overflow: hidden;
+      text-align: center;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .speculative-note {
+      position: absolute;
+      z-index: 18;
+      right: clamp(22px, 5vw, 78px);
+      top: clamp(78px, 12vh, 130px);
+      max-width: 190px;
+      margin: 0;
+      color: color-mix(in srgb, var(--ink) 66%, transparent);
+      font-size: 10px;
+      line-height: 1.45;
+      text-align: right;
+    }
+
+    @media (max-width: 760px) {
+      :root {
+        --dial-size: 116px;
+      }
+
+      .masthead {
+        gap: 12px;
+        padding: 18px 18px 0;
+      }
+
+      .title-lockup p {
+        display: none;
+      }
+
+      h1 {
+        max-width: none;
+        font-size: 38px;
+        line-height: 0.92;
+      }
+
+      h1 span {
+        display: block;
+        margin: 5px 0 0;
+        font-size: 0.45em;
+      }
+
+      .live-marker {
+        min-height: 30px;
+        padding: 0 9px;
+        font-size: 8px;
+      }
+
+      .city-svg {
+        width: 145%;
+        max-width: none;
+        transform: translateX(-23%);
+      }
+
+      .story {
+        left: 14px;
+        right: 14px;
+        bottom: calc(var(--safe-bottom) + 143px);
+        width: auto;
+        padding: 13px 14px 14px;
+        border-radius: 12px;
+      }
+
+      .story-copy {
+        min-height: 0;
+        margin: 6px 0 0 40px;
+        font-size: 11px;
+      }
+
+      .systems {
+        gap: 6px;
+        margin: 9px 0 0 40px;
+        padding-top: 8px;
+      }
+
+      .system-label {
+        font-size: 8px;
+      }
+
+      .system-value {
+        font-size: 9px;
+      }
+
+      .dial-console {
+        right: 50%;
+        bottom: var(--safe-bottom);
+        transform: translateX(50%);
+      }
+
+      .dial-label {
+        display: none;
+      }
+
+      .speculative-note {
+        display: none;
+      }
+    }
+
+    @media (max-height: 570px) {
+      :root {
+        --dial-size: 104px;
+      }
+
+      .masthead {
+        padding-top: 14px;
+      }
+
+      .title-lockup p,
+      .speculative-note,
+      .systems {
+        display: none;
+      }
+
+      h1 {
+        max-width: none;
+        font-size: 35px;
+      }
+
+      h1 span {
+        display: inline;
+        margin: 0 0 0 8px;
+        font-size: 0.46em;
+      }
+
+      .story {
+        left: 18px;
+        bottom: 18px;
+        width: min(310px, 44vw);
+        padding: 12px 14px;
+      }
+
+      .story-copy {
+        min-height: 0;
+        margin-top: 5px;
+        font-size: 10px;
+      }
+
+      .dial-console {
+        right: 24px;
+        bottom: 10px;
+        transform: none;
+      }
+
+      .dial-label {
+        display: none;
+      }
+
+      .dial-guide {
+        margin-top: 5px;
+      }
+    }
+
+    @media (max-width: 520px) and (max-height: 700px) {
+      .story-copy,
+      .systems {
+        display: none;
+      }
+
+      .story {
+        bottom: calc(var(--safe-bottom) + 132px);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 1ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 1ms !important;
+      }
+    }
+
+    @media (prefers-reduced-transparency: reduce) {
+      .live-marker,
+      .story {
+        background: var(--surface);
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app" id="app" data-testid="dial-2035-exhibit" data-year="2026">
+    <header class="masthead">
+      <div class="title-lockup">
+        <p>Urban Climate Lab</p>
+        <h1>Dial 2035 <span>Watch a city adapt.</span></h1>
+      </div>
+      <div class="live-marker" aria-label="Live build marker">DIAL2035-LIVE</div>
+    </header>
+
+    <main class="scene" aria-label="A speculative coastal city that transforms from 2026 to 2035">
+      <svg class="city-svg" id="cityScene" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" role="img" aria-labelledby="cityTitle cityDescription">
+        <title id="cityTitle">A coastal city adapting to climate change</title>
+        <desc id="cityDescription">Turn the climate dial from 2026 to 2035 to reveal cool roofs, shade, sponge streets, storm storage, local energy, public transit, living walls and tidal wetlands.</desc>
+        <defs>
+          <linearGradient id="skyGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop id="skyTop" offset="0" stop-color="var(--sky-top)"/>
+            <stop id="skyBottom" offset="1" stop-color="var(--sky-bottom)"/>
+          </linearGradient>
+          <linearGradient id="waterGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="var(--water-top)"/>
+            <stop offset="1" stop-color="var(--water-bottom)"/>
+          </linearGradient>
+          <linearGradient id="glassGradient" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="var(--glass)" stop-opacity="0.88"/>
+            <stop offset="1" stop-color="var(--glass-dark)" stop-opacity="0.98"/>
+          </linearGradient>
+          <linearGradient id="roadGradient" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="var(--road)"/>
+            <stop offset="0.5" stop-color="color-mix(in srgb, var(--road) 82%, var(--surface) 18%)"/>
+            <stop offset="1" stop-color="var(--road)"/>
+          </linearGradient>
+          <filter id="softShadow" x="-30%" y="-30%" width="160%" height="180%">
+            <feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#0b1d1a" flood-opacity="0.18"/>
+          </filter>
+          <filter id="soften">
+            <feGaussianBlur stdDeviation="10"/>
+          </filter>
+          <clipPath id="waterClip">
+            <path d="M0 672 C340 654 612 686 880 667 C1132 649 1350 674 1600 654 L1600 900 L0 900 Z"/>
+          </clipPath>
+        </defs>
+
+        <rect width="1600" height="900" fill="url(#skyGradient)"/>
+        <circle id="sun" cx="1260" cy="174" r="62" fill="var(--accent)" opacity="0.7"/>
+        <circle cx="1260" cy="174" r="96" fill="var(--accent)" opacity="0.08" filter="url(#soften)"/>
+
+        <g opacity="0.28" fill="var(--surface)">
+          <path d="M118 224 C160 182 227 190 247 234 C293 220 344 248 345 288 L88 288 C76 261 87 237 118 224 Z"/>
+          <path d="M1086 264 C1117 228 1172 232 1195 270 C1237 251 1286 270 1297 312 L1044 312 C1044 286 1059 270 1086 264 Z"/>
+        </g>
+
+        <g class="heat-line transition-transform" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round">
+          <path d="M338 430 C310 397 367 374 337 338"/>
+          <path d="M788 418 C754 382 814 356 782 317"/>
+          <path d="M1134 444 C1105 408 1161 388 1133 350"/>
+        </g>
+
+        <g id="rain" stroke="var(--surface)" stroke-width="5" stroke-linecap="round">
+          <line class="rain-streak" style="--i:0" x1="130" y1="152" x2="98" y2="206"/>
+          <line class="rain-streak" style="--i:1" x1="260" y1="115" x2="228" y2="169"/>
+          <line class="rain-streak" style="--i:2" x1="392" y1="176" x2="360" y2="230"/>
+          <line class="rain-streak" style="--i:3" x1="528" y1="132" x2="496" y2="186"/>
+          <line class="rain-streak" style="--i:4" x1="666" y1="192" x2="634" y2="246"/>
+          <line class="rain-streak" style="--i:5" x1="804" y1="121" x2="772" y2="175"/>
+          <line class="rain-streak" style="--i:6" x1="940" y1="164" x2="908" y2="218"/>
+          <line class="rain-streak" style="--i:7" x1="1080" y1="112" x2="1048" y2="166"/>
+          <line class="rain-streak" style="--i:8" x1="1218" y1="188" x2="1186" y2="242"/>
+          <line class="rain-streak" style="--i:9" x1="1360" y1="133" x2="1328" y2="187"/>
+          <line class="rain-streak" style="--i:10" x1="1490" y1="185" x2="1458" y2="239"/>
+        </g>
+
+        <g opacity="0.3" fill="var(--concrete-dark)">
+          <rect x="0" y="475" width="105" height="211"/>
+          <rect x="119" y="432" width="86" height="254"/>
+          <rect x="220" y="497" width="76" height="189"/>
+          <rect x="307" y="452" width="118" height="234"/>
+          <rect x="1230" y="456" width="97" height="230"/>
+          <rect x="1340" y="404" width="110" height="282"/>
+          <rect x="1462" y="466" width="138" height="220"/>
+        </g>
+
+        <path d="M0 635 C237 612 430 628 619 612 C833 594 1068 625 1262 602 C1384 588 1490 594 1600 581 L1600 720 L0 720 Z" fill="var(--ground)"/>
+        <path d="M0 641 C284 619 486 639 727 619 C984 598 1253 631 1600 589" fill="none" stroke="color-mix(in srgb, var(--surface) 40%, transparent)" stroke-width="3"/>
+
+        <g id="cityBlock" filter="url(#softShadow)">
+          <g id="buildingA">
+            <path d="M185 608 L185 358 L356 358 L356 608 Z" fill="var(--concrete)"/>
+            <path d="M203 608 L203 390 L338 390 L338 608 Z" fill="url(#glassGradient)" opacity="0.74"/>
+            <g fill="var(--surface)" opacity="0.54">
+              <rect x="222" y="418" width="27" height="34" rx="2"/>
+              <rect x="260" y="418" width="27" height="34" rx="2"/>
+              <rect x="298" y="418" width="21" height="34" rx="2"/>
+              <rect x="222" y="474" width="27" height="34" rx="2"/>
+              <rect x="260" y="474" width="27" height="34" rx="2"/>
+              <rect x="298" y="474" width="21" height="34" rx="2"/>
+              <rect x="222" y="530" width="27" height="34" rx="2"/>
+              <rect x="260" y="530" width="27" height="34" rx="2"/>
+              <rect x="298" y="530" width="21" height="34" rx="2"/>
+            </g>
+            <rect class="roof-dark transition-opacity" x="174" y="345" width="193" height="19" rx="4" fill="var(--road)"/>
+            <rect class="roof-cool transition-opacity" x="174" y="345" width="193" height="19" rx="4" fill="var(--surface)"/>
+            <g class="solar-panel energy-system transition-transform" fill="#294f58" stroke="var(--surface)" stroke-opacity="0.45" stroke-width="2">
+              <path d="M201 326 L262 326 L278 347 L213 347 Z"/>
+              <path d="M276 326 L337 326 L350 347 L288 347 Z"/>
+            </g>
+          </g>
+
+          <g id="buildingB">
+            <path d="M397 609 L397 276 L604 276 L604 609 Z" fill="var(--concrete-dark)"/>
+            <path d="M421 609 L421 312 L580 312 L580 609 Z" fill="url(#glassGradient)"/>
+            <path d="M500 312 L500 609" stroke="var(--surface)" stroke-opacity="0.34" stroke-width="5"/>
+            <g fill="var(--surface)" opacity="0.4">
+              <rect x="444" y="347" width="34" height="49" rx="3"/>
+              <rect x="522" y="347" width="34" height="49" rx="3"/>
+              <rect x="444" y="423" width="34" height="49" rx="3"/>
+              <rect x="522" y="423" width="34" height="49" rx="3"/>
+              <rect x="444" y="499" width="34" height="49" rx="3"/>
+              <rect x="522" y="499" width="34" height="49" rx="3"/>
+            </g>
+            <rect class="roof-dark transition-opacity" x="386" y="263" width="229" height="20" rx="4" fill="var(--road)"/>
+            <rect class="roof-cool transition-opacity" x="386" y="263" width="229" height="20" rx="4" fill="var(--surface)"/>
+            <g class="green-system transition-transform" fill="var(--canopy-light)">
+              <rect x="421" y="335" width="159" height="8" rx="4"/>
+              <circle cx="440" cy="329" r="11"/>
+              <circle cx="464" cy="325" r="15"/>
+              <circle cx="493" cy="329" r="12"/>
+              <circle cx="524" cy="325" r="16"/>
+              <circle cx="555" cy="329" r="12"/>
+            </g>
+            <g class="green-system transition-transform" stroke="var(--canopy)" stroke-width="7" stroke-linecap="round">
+              <path d="M409 380 C448 398 463 430 451 473 C442 506 468 538 482 584"/>
+              <path d="M590 365 C558 398 552 438 563 481 C570 512 554 550 540 588"/>
+            </g>
+          </g>
+
+          <g id="buildingC">
+            <path d="M635 608 L635 402 L806 402 L806 608 Z" fill="var(--concrete)"/>
+            <path d="M657 608 L657 431 L784 431 L784 608 Z" fill="url(#glassGradient)" opacity="0.86"/>
+            <g fill="var(--surface)" opacity="0.46">
+              <rect x="678" y="459" width="31" height="41" rx="3"/>
+              <rect x="733" y="459" width="31" height="41" rx="3"/>
+              <rect x="678" y="523" width="31" height="41" rx="3"/>
+              <rect x="733" y="523" width="31" height="41" rx="3"/>
+            </g>
+            <rect class="roof-dark transition-opacity" x="624" y="389" width="193" height="20" rx="4" fill="var(--road)"/>
+            <rect class="roof-cool transition-opacity" x="624" y="389" width="193" height="20" rx="4" fill="var(--surface)"/>
+            <g class="solar-panel energy-system transition-transform" fill="#294f58" stroke="var(--surface)" stroke-opacity="0.45" stroke-width="2">
+              <path d="M649 367 L708 367 L723 390 L660 390 Z"/>
+              <path d="M721 367 L780 367 L794 390 L734 390 Z"/>
+            </g>
+          </g>
+
+          <g id="tower">
+            <path d="M841 608 L841 204 L1033 204 L1033 608 Z" fill="var(--concrete-dark)"/>
+            <path d="M869 608 L869 237 L1005 237 L1005 608 Z" fill="url(#glassGradient)"/>
+            <path d="M913 237 L913 608 M961 237 L961 608" stroke="var(--surface)" stroke-opacity="0.32" stroke-width="4"/>
+            <g fill="var(--surface)" opacity="0.39">
+              <rect x="881" y="274" width="20" height="44" rx="3"/>
+              <rect x="925" y="274" width="24" height="44" rx="3"/>
+              <rect x="973" y="274" width="20" height="44" rx="3"/>
+              <rect x="881" y="351" width="20" height="44" rx="3"/>
+              <rect x="925" y="351" width="24" height="44" rx="3"/>
+              <rect x="973" y="351" width="20" height="44" rx="3"/>
+              <rect x="881" y="428" width="20" height="44" rx="3"/>
+              <rect x="925" y="428" width="24" height="44" rx="3"/>
+              <rect x="973" y="428" width="20" height="44" rx="3"/>
+              <rect x="881" y="505" width="20" height="44" rx="3"/>
+              <rect x="925" y="505" width="24" height="44" rx="3"/>
+              <rect x="973" y="505" width="20" height="44" rx="3"/>
+            </g>
+            <rect class="roof-dark transition-opacity" x="830" y="191" width="214" height="20" rx="4" fill="var(--road)"/>
+            <rect class="roof-cool transition-opacity" x="830" y="191" width="214" height="20" rx="4" fill="var(--surface)"/>
+            <g class="green-system transition-transform" fill="var(--canopy-light)">
+              <circle cx="868" cy="210" r="15"/>
+              <circle cx="894" cy="204" r="19"/>
+              <circle cx="925" cy="207" r="16"/>
+              <circle cx="957" cy="203" r="20"/>
+              <circle cx="991" cy="208" r="15"/>
+            </g>
+            <g class="green-system transition-transform" fill="var(--canopy)">
+              <rect x="848" y="322" width="14" height="242" rx="7"/>
+              <circle cx="855" cy="335" r="16"/>
+              <circle cx="855" cy="371" r="13"/>
+              <circle cx="855" cy="414" r="17"/>
+              <circle cx="855" cy="459" r="13"/>
+              <circle cx="855" cy="501" r="16"/>
+              <circle cx="855" cy="544" r="13"/>
+            </g>
+          </g>
+
+          <g id="buildingD">
+            <path d="M1064 608 L1064 338 L1235 338 L1235 608 Z" fill="var(--concrete)"/>
+            <path d="M1086 608 L1086 371 L1213 371 L1213 608 Z" fill="url(#glassGradient)" opacity="0.88"/>
+            <g fill="var(--surface)" opacity="0.45">
+              <rect x="1106" y="405" width="31" height="42" rx="3"/>
+              <rect x="1161" y="405" width="31" height="42" rx="3"/>
+              <rect x="1106" y="476" width="31" height="42" rx="3"/>
+              <rect x="1161" y="476" width="31" height="42" rx="3"/>
+              <rect x="1106" y="547" width="31" height="42" rx="3"/>
+              <rect x="1161" y="547" width="31" height="42" rx="3"/>
+            </g>
+            <rect class="roof-dark transition-opacity" x="1053" y="325" width="193" height="20" rx="4" fill="var(--road)"/>
+            <rect class="roof-cool transition-opacity" x="1053" y="325" width="193" height="20" rx="4" fill="var(--surface)"/>
+            <g class="solar-panel energy-system transition-transform" fill="#294f58" stroke="var(--surface)" stroke-opacity="0.45" stroke-width="2">
+              <path d="M1079 303 L1137 303 L1152 326 L1090 326 Z"/>
+              <path d="M1150 303 L1208 303 L1222 326 L1163 326 Z"/>
+            </g>
+          </g>
+        </g>
+
+        <g class="shade-system transition-transform" fill="var(--accent)" opacity="0">
+          <path d="M294 582 L384 582 L365 613 L275 613 Z" opacity="0.72"/>
+          <path d="M609 579 L697 579 L681 611 L590 611 Z" opacity="0.72"/>
+          <path d="M1015 577 L1108 577 L1088 610 L996 610 Z" opacity="0.72"/>
+          <path d="M1243 579 L1338 579 L1317 611 L1225 611 Z" opacity="0.72"/>
+        </g>
+
+        <g id="trees" stroke="var(--concrete-dark)" stroke-width="10" stroke-linecap="round">
+          <g class="shade-tree transition-transform">
+            <path d="M147 608 L147 538"/>
+            <circle cx="147" cy="515" r="42" fill="var(--canopy)" stroke="none"/>
+            <circle cx="124" cy="531" r="27" fill="var(--canopy-light)" stroke="none"/>
+          </g>
+          <g class="shade-tree transition-transform">
+            <path d="M1291 610 L1291 526"/>
+            <circle cx="1291" cy="503" r="46" fill="var(--canopy)" stroke="none"/>
+            <circle cx="1265" cy="522" r="29" fill="var(--canopy-light)" stroke="none"/>
+          </g>
+          <g class="shade-tree transition-transform">
+            <path d="M1387 612 L1387 551"/>
+            <circle cx="1387" cy="527" r="38" fill="var(--canopy)" stroke="none"/>
+            <circle cx="1365" cy="540" r="24" fill="var(--canopy-light)" stroke="none"/>
+          </g>
+        </g>
+
+        <g id="roadLayer">
+          <path class="old-road transition-opacity" d="M0 635 L1600 602 L1600 724 L0 742 Z" fill="url(#roadGradient)"/>
+          <path class="old-road transition-opacity" d="M0 692 L1600 658" fill="none" stroke="var(--surface)" stroke-opacity="0.62" stroke-width="5" stroke-dasharray="38 34"/>
+          <g class="old-road transition-opacity">
+            <g fill="var(--accent)">
+              <path d="M186 646 H258 L276 665 H169 Z"/>
+              <rect x="194" y="627" width="48" height="25" rx="9"/>
+              <circle cx="196" cy="668" r="12" fill="var(--road)"/>
+              <circle cx="251" cy="667" r="12" fill="var(--road)"/>
+            </g>
+            <g fill="var(--surface)">
+              <path d="M1266 640 H1343 L1363 659 H1248 Z"/>
+              <rect x="1275" y="620" width="51" height="26" rx="9"/>
+              <circle cx="1277" cy="662" r="12" fill="var(--road)"/>
+              <circle cx="1336" cy="661" r="12" fill="var(--road)"/>
+            </g>
+          </g>
+
+          <g class="sponge-street transition-transform">
+            <path d="M255 678 C540 646 846 662 1130 628 L1153 700 C846 729 544 718 242 746 Z" fill="var(--canopy)"/>
+            <path d="M279 684 C559 658 845 671 1110 641" fill="none" stroke="var(--canopy-light)" stroke-width="18" stroke-linecap="round" stroke-dasharray="4 24"/>
+            <path d="M298 700 C572 677 843 688 1097 657" fill="none" stroke="var(--water-top)" stroke-width="10" stroke-linecap="round" opacity="0.72"/>
+          </g>
+
+          <g class="storm-system transition-transform">
+            <path d="M601 650 C689 631 796 632 882 644 C856 700 819 724 740 727 C669 729 624 705 601 650 Z" fill="var(--water-top)" opacity="0.72"/>
+            <path d="M628 659 C696 648 791 648 850 657" fill="none" stroke="var(--surface)" stroke-opacity="0.55" stroke-width="4"/>
+            <g fill="var(--canopy-light)">
+              <circle cx="637" cy="647" r="15"/>
+              <circle cx="669" cy="642" r="18"/>
+              <circle cx="814" cy="642" r="18"/>
+              <circle cx="847" cy="648" r="14"/>
+            </g>
+          </g>
+        </g>
+
+        <g class="energy-system transition-transform" fill="none" stroke="var(--accent)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M238 348 L238 632 L492 675 L718 677 L937 643 L1147 329" opacity="0.82"/>
+          <circle cx="238" cy="348" r="10" fill="var(--accent)" stroke="none"/>
+          <circle cx="492" cy="675" r="10" fill="var(--accent)" stroke="none"/>
+          <circle cx="937" cy="643" r="10" fill="var(--accent)" stroke="none"/>
+          <circle cx="1147" cy="329" r="10" fill="var(--accent)" stroke="none"/>
+        </g>
+
+        <g class="transit-system transition-transform" id="transitLine">
+          <path d="M42 539 C398 512 771 524 1117 498 C1324 482 1476 492 1600 473" fill="none" stroke="var(--concrete-dark)" stroke-width="18"/>
+          <path d="M42 534 C398 507 771 519 1117 493 C1324 477 1476 487 1600 468" fill="none" stroke="var(--surface)" stroke-opacity="0.84" stroke-width="6"/>
+          <g stroke="var(--concrete-dark)" stroke-width="11">
+            <path d="M247 520 L247 624"/>
+            <path d="M622 512 L622 624"/>
+            <path d="M1010 500 L1010 620"/>
+            <path d="M1404 479 L1404 609"/>
+          </g>
+          <g id="train">
+            <path d="M551 470 C562 448 582 439 609 438 L798 430 C824 429 841 441 851 461 L856 484 L548 505 Z" fill="var(--accent)"/>
+            <path d="M590 451 L775 444 C790 444 802 450 809 462 L599 476 Z" fill="var(--surface)" opacity="0.84"/>
+            <circle cx="610" cy="491" r="10" fill="var(--road)"/>
+            <circle cx="806" cy="478" r="10" fill="var(--road)"/>
+          </g>
+        </g>
+
+        <g id="waterLayer">
+          <path d="M0 672 C340 654 612 686 880 667 C1132 649 1350 674 1600 654 L1600 900 L0 900 Z" fill="url(#waterGradient)"/>
+          <g clip-path="url(#waterClip)" fill="none" stroke="var(--surface)" stroke-opacity="0.34" stroke-width="4">
+            <path d="M-80 724 C187 690 418 744 682 709 C942 674 1199 731 1690 682"/>
+            <path d="M-98 782 C213 747 463 799 726 767 C1042 729 1334 785 1687 741"/>
+            <path d="M-80 846 C234 817 512 860 815 831 C1099 804 1364 847 1691 810"/>
+          </g>
+        </g>
+
+        <g class="hard-edge transition-transform">
+          <path d="M0 667 C330 651 599 676 879 659 C1124 645 1352 665 1600 646 L1600 687 C1342 707 1122 688 877 703 C594 720 334 693 0 713 Z" fill="var(--concrete-dark)"/>
+          <path d="M0 667 C330 651 599 676 879 659 C1124 645 1352 665 1600 646" fill="none" stroke="var(--surface)" stroke-opacity="0.52" stroke-width="5"/>
+        </g>
+
+        <g class="wetland transition-transform">
+          <path d="M0 676 C259 654 474 684 720 666 C945 650 1202 679 1600 642 L1600 724 C1266 753 1030 724 736 747 C464 768 247 731 0 761 Z" fill="var(--sand)" opacity="0.86"/>
+          <path d="M0 706 C280 681 483 717 733 695 C974 674 1215 708 1600 668" fill="none" stroke="var(--canopy)" stroke-width="18" stroke-linecap="round" stroke-dasharray="3 17"/>
+          <g stroke="var(--canopy-light)" stroke-width="5" stroke-linecap="round">
+            <path d="M114 711 L106 666 M137 710 L143 658 M167 711 L159 674"/>
+            <path d="M442 719 L435 670 M467 717 L475 665 M493 716 L488 680"/>
+            <path d="M958 704 L949 657 M987 703 L994 650 M1016 703 L1011 668"/>
+            <path d="M1327 690 L1320 642 M1357 689 L1364 634 M1385 686 L1380 651"/>
+          </g>
+          <path d="M193 662 C495 637 747 668 1005 646 C1229 627 1405 646 1600 623" fill="none" stroke="var(--surface)" stroke-opacity="0.72" stroke-width="12" stroke-linecap="round"/>
+        </g>
+
+        <g class="connection-system transition-opacity" fill="none">
+          <path id="finalSignal" d="M238 348 L238 632 C467 674 681 687 937 643 L1147 329 M937 643 C1129 681 1300 689 1466 662" stroke="var(--accent)" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+        </g>
+      </svg>
+
+      <section class="story" aria-live="polite" aria-atomic="true">
+        <div class="story-head">
+          <span class="story-year" id="storyYear">2026</span>
+          <h2 id="storyTitle">Built to resist</h2>
+        </div>
+        <p class="story-copy" id="storyCopy">Dark roofs, hard edges and exposed asphalt hold the old pattern in place.</p>
+        <div class="systems" aria-label="City system states">
+          <div>
+            <span class="system-label">Heat</span>
+            <span class="system-value" id="heatValue">Exposed</span>
+          </div>
+          <div>
+            <span class="system-label">Water</span>
+            <span class="system-value" id="waterValue">Deflected</span>
+          </div>
+          <div>
+            <span class="system-label">Movement</span>
+            <span class="system-value" id="moveValue">Cars first</span>
+          </div>
+        </div>
+      </section>
+
+      <p class="speculative-note">A speculative design exhibit, not a forecast. Climate pressure remains visible as the city learns to live with it.</p>
+
+      <section class="dial-console" aria-label="Climate adaptation controls">
+        <div class="dial-label">Climate adaptation year</div>
+        <div class="dial-shell">
+          <input class="dial-input" id="yearDial" data-testid="climate-dial" type="range" min="2026" max="2035" step="1" value="2026" aria-label="Climate adaptation year" aria-valuemin="2026" aria-valuemax="2035" aria-valuenow="2026" aria-valuetext="2026, Built to resist">
+          <div class="dial-face" aria-hidden="true">
+            <div class="dial-pointer"></div>
+            <div class="dial-core">
+              <span class="dial-year" id="dialYear">2026</span>
+              <span class="dial-subtitle">Climate dial</span>
+            </div>
+          </div>
+        </div>
+        <div class="dial-guide" aria-hidden="true">
+          <span>2026</span>
+          <span>DRAG OR USE ARROWS</span>
+          <span>2035</span>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const YEARS = {
+        2026: {
+          title: "Built to resist",
+          copy: "Dark roofs, hard edges and exposed asphalt hold the old pattern in place.",
+          heat: "Exposed",
+          water: "Deflected",
+          movement: "Cars first"
+        },
+        2027: {
+          title: "Reflect heat",
+          copy: "Pale roofs send summer heat back skyward before it enters the buildings.",
+          heat: "Reflected",
+          water: "Deflected",
+          movement: "Cars first"
+        },
+        2028: {
+          title: "Make shade",
+          copy: "Trees and solar awnings cool the routes people use every day.",
+          heat: "Shaded",
+          water: "Deflected",
+          movement: "Cooler walks"
+        },
+        2029: {
+          title: "Soak the street",
+          copy: "One traffic lane becomes a planted street that drinks the first rain.",
+          heat: "Shaded",
+          water: "Absorbing",
+          movement: "Shared street"
+        },
+        2030: {
+          title: "Store the storm",
+          copy: "A lowered park holds cloudbursts, then releases the water slowly.",
+          heat: "Shaded",
+          water: "Stored",
+          movement: "Shared street"
+        },
+        2031: {
+          title: "Generate locally",
+          copy: "Roofs unfold into a neighborhood energy network tied beneath the street.",
+          heat: "Shaded",
+          water: "Stored",
+          movement: "Local power"
+        },
+        2032: {
+          title: "Move more people",
+          copy: "Electric transit arrives. Road space gives people and trees more room.",
+          heat: "Shaded",
+          water: "Stored",
+          movement: "Transit first"
+        },
+        2033: {
+          title: "Grow the walls",
+          copy: "Roofs, balconies and facades connect into a continuous cooling canopy.",
+          heat: "Canopied",
+          water: "Stored",
+          movement: "Transit first"
+        },
+        2034: {
+          title: "Give tide room",
+          copy: "The seawall steps back. Wetlands soften waves and make a new shoreline.",
+          heat: "Canopied",
+          water: "Welcomed",
+          movement: "Transit first"
+        },
+        2035: {
+          title: "Everything connects",
+          copy: "Energy, water, movement and shade now operate as one living system.",
+          heat: "Balanced",
+          water: "Welcomed",
+          movement: "Connected"
+        }
+      };
+
+      const app = document.getElementById("app");
+      const scene = document.getElementById("cityScene");
+      const dial = document.getElementById("yearDial");
+      const dialYear = document.getElementById("dialYear");
+      const storyYear = document.getElementById("storyYear");
+      const storyTitle = document.getElementById("storyTitle");
+      const storyCopy = document.getElementById("storyCopy");
+      const heatValue = document.getElementById("heatValue");
+      const waterValue = document.getElementById("waterValue");
+      const moveValue = document.getElementById("moveValue");
+      const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+      let currentYear = 2026;
+
+      const clamp = value => Math.max(0, Math.min(1, value));
+      const phase = (year, begins) => clamp(year - begins);
+      const hexToRgb = hex => {
+        const value = hex.replace("#", "");
+        return [0, 2, 4].map(index => parseInt(value.slice(index, index + 2), 16));
+      };
+      const rgbToHex = values => `#${values.map(value => Math.round(value).toString(16).padStart(2, "0")).join("")}`;
+      const mix = (from, to, amount) => {
+        const a = hexToRgb(from);
+        const b = hexToRgb(to);
+        return rgbToHex(a.map((channel, index) => channel + (b[index] - channel) * amount));
+      };
+      const isDark = () => window.matchMedia("(prefers-color-scheme: dark)").matches;
+
+      function updateAtmosphere(progress) {
+        const palette = isDark()
+          ? { topA: "#142328", topB: "#3b2423", bottomA: "#2a4245", bottomB: "#8b5039", waterA: "#416e78", waterB: "#2d5360" }
+          : { topA: "#c9dedd", topB: "#dca285", bottomA: "#edf2ea", bottomB: "#efc985", waterA: "#6e999c", waterB: "#547e84" };
+        document.documentElement.style.setProperty("--sky-top", mix(palette.topA, palette.topB, progress));
+        document.documentElement.style.setProperty("--sky-bottom", mix(palette.bottomA, palette.bottomB, progress));
+        document.documentElement.style.setProperty("--water-top", mix(palette.waterA, palette.waterB, progress));
+      }
+
+      function replayMoment(year, previousYear) {
+        scene.classList.remove("rain-run", "train-run", "signal-run");
+        if (reducedMotion.matches || year === previousYear) return;
+        void scene.getBoundingClientRect();
+        if (year === 2030) scene.classList.add("rain-run");
+        if (year === 2032) scene.classList.add("train-run");
+        if (year === 2035) scene.classList.add("signal-run");
+      }
+
+      function setYear(requestedYear, options = {}) {
+        const year = Math.max(2026, Math.min(2035, Number(requestedYear) || 2026));
+        const previousYear = currentYear;
+        const progress = (year - 2026) / 9;
+        const state = YEARS[year];
+
+        currentYear = year;
+        dial.value = String(year);
+        app.dataset.year = String(year);
+        scene.style.setProperty("--climate", progress.toFixed(4));
+        scene.style.setProperty("--reflect", phase(year, 2026));
+        scene.style.setProperty("--shade", phase(year, 2027));
+        scene.style.setProperty("--street", phase(year, 2028));
+        scene.style.setProperty("--storm", phase(year, 2029));
+        scene.style.setProperty("--energy", phase(year, 2030));
+        scene.style.setProperty("--transit", phase(year, 2031));
+        scene.style.setProperty("--green", phase(year, 2032));
+        scene.style.setProperty("--wetland", phase(year, 2033));
+        scene.style.setProperty("--connect", phase(year, 2034));
+        document.documentElement.style.setProperty("--dial-progress", progress.toFixed(4));
+        document.documentElement.style.setProperty("--dial-angle", `${-132 + progress * 264}deg`);
+        updateAtmosphere(progress);
+
+        dialYear.textContent = year;
+        storyYear.textContent = year;
+        storyTitle.textContent = state.title;
+        storyCopy.textContent = state.copy;
+        heatValue.textContent = state.heat;
+        waterValue.textContent = state.water;
+        moveValue.textContent = state.movement;
+        dial.setAttribute("aria-valuenow", String(year));
+        dial.setAttribute("aria-valuetext", `${year}, ${state.title}`);
+
+        if (!options.silent) replayMoment(year, previousYear);
+        window.dispatchEvent(new CustomEvent("dial2035:change", { detail: { year, state } }));
+        return { year, ...state };
+      }
+
+      dial.addEventListener("input", event => setYear(event.target.value));
+      dial.addEventListener("wheel", event => {
+        event.preventDefault();
+        setYear(currentYear + (event.deltaY > 0 ? 1 : -1));
+      }, { passive: false });
+
+      window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
+        updateAtmosphere((currentYear - 2026) / 9);
+      });
+
+      window.__dial2035 = {
+        marker: "DIAL2035-LIVE",
+        setYear,
+        getYear: () => currentYear,
+        getState: () => ({ year: currentYear, ...YEARS[currentYear] }),
+        years: Object.keys(YEARS).map(Number)
+      };
+
+      setYear(2026, { silent: true });
+    })();
+  </script>
+</body>
+</html>
